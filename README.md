@@ -1,6 +1,9 @@
 # Stori Data Engineering Challenge (español)
 Este proyecto implementa un pipeline de datos robusto y orquestado que extrae información de una API pública, la procesa localmente, la almacena en AWS S3 y finalmente la ingesta en Snowflake.
 
+Como se puede ver, los datos corresponden a los productos de una tienda de comercio, estos datos no están normalizados (3NF), si embargo, esto es una simulación de los datos que se pueden ingestar, por ejemplo, en una base de datos diseñada para OLTP. Esta solución sería, en todo caso, analysis-ready.
+
+
 # Arquitectura del proyecto:
 El flujo de datos sigue este orden:
 
@@ -85,5 +88,13 @@ Grupos/carpetas en S3 inconsistentes: Dado que está pensada para una carga diar
 Tabla stage no flexible: Al tener problemas para hacer flexible la tabla de stage (bronze layer), se optó por seleccionar solamente las columnas de acuerdo a su posición. Si alguna columna, faltara o cambiara su posición, seguramente daría errores no deseados. Por lo tanto, es importantye agregar a la clase un INFER_SCHEMA para crear esta tabla de stage/bronze. 
 
 
+
+
+# Ejemplo de éxito en runs de airflow
 ![alt text](image.png)
+
+
+# Ejemplo de los datos ingestados
+
+![alt text](image-1.png)
 
