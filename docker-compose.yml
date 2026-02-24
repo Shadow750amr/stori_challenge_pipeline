@@ -1,0 +1,60 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:13
+    container_name: airflow_postgres
+    environment:
+      - POSTGRES_USER=airflow
+      - POSTGRES_PASSWORD=airflow
+      - POSTGRES_DB=airflow
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+# UI
+  airflow-webserver:
+    build: .
+    container_name: airflow_webserver
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:             
+      - .env
+    environment:
+      - LOAD_EX=n
+      - EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
+      - AIRFLOW__CORE__FERNET_KEY=${FERNET_KEY} 
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+      - PYTHONPATH=/opt/airflow  
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./scripts:/opt/airflow/scripts  
+    ports:
+      - "8081:8080"
+    command: webserver
+    user: "${AIRFLOW_UID:-5000}:0"
+
+# scheduler
+  airflow-scheduler:
+    build: .
+    container_name: airflow_scheduler
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:             
+      - .env
+    environment:
+      - LOAD_EX=n
+      - EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
+      - AIRFLOW__CORE__FERNET_KEY=${FERNET_KEY}
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+      - PYTHONPATH=/opt/airflow  
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./scripts:/opt/airflow/scripts  
+    command: bash -c "airflow db init && airflow users create --username admin --firstname admin --lastname admin --role Admin --email admin@example.com --password admin && airflow scheduler"
+    user: "${AIRFLOW_UID:-5000}:0"

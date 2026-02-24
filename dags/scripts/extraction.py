@@ -44,6 +44,7 @@ class Extraction:
             data.to_csv(self.output_name)
 
 if __name__ == "__main__":
+
     extractor = Extraction(URL, OUT_JSON_NAME,OUT_CSV_NAME)
     extractor.connect_and_save()
     extractor.flatten_json()
